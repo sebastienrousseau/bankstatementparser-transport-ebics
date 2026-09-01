@@ -4,7 +4,6 @@
 """Advanced workflow example for bankstatementparser-transport-ebics."""
 
 
-
 def main() -> None:
     print(
         "Running advanced bankstatementparser-transport-ebics demonstration..."
