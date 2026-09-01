@@ -3,8 +3,6 @@
 
 """Microbenchmarks for bankstatementparser-transport-ebics."""
 
-import pytest
-
 
 def test_benchmark_placeholder() -> None:
     """Placeholder benchmark for automated harness."""
