@@ -1,0 +1,22 @@
+{
+  "bankstatementparser_transport_ebics/client.py::EbicsClient.fetch_statement": {
+    "cognitive": 26,
+    "cyclomatic": 24,
+    "lines": 96
+  },
+  "bankstatementparser_transport_ebics/client.py::EbicsClient.parse_response": {
+    "cognitive": 19,
+    "cyclomatic": 13,
+    "lines": 70
+  },
+  "tests/test_client.py::test_fetch_statement_and_parse": {
+    "cyclomatic": 12
+  },
+  "tests/test_suite_conformance.py": {
+    "file_lines": 678
+  },
+  "tests/test_suite_conformance.py::_dev_spec": {
+    "cognitive": 23,
+    "cyclomatic": 12
+  }
+}
