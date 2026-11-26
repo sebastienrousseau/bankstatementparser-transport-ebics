@@ -40,6 +40,22 @@ jobs:
       - name: Enforce 100% docstring coverage
         run: interrogate -c pyproject.toml bankstatementparser_transport_ebics
 
+  test-all:
+    # One check that stands for every leg of the test matrix, so branch
+    # protection can require it by name and adding or dropping a version
+    # never renames a required check.
+    name: Test (all)
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Every leg of the matrix passed
+        env:
+          RESULT: ${{ needs.test.result }}
+        run: test "$RESULT" = success
+
   lint:
     name: Lint & Type Check
     runs-on: ubuntu-latest
@@ -70,3 +86,59 @@ jobs:
 
       - name: Security audit with Bandit
         run: bandit -r bankstatementparser_transport_ebics -c pyproject.toml
+
+  examples:
+    name: Examples
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install this package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Run examples
+        run: |
+          for f in examples/*.py; do echo "=== $f ==="; python "$f"; done
+
+  smoke:
+    # The wheel PyPI receives, installed on its own: catches a package
+    # that only imports from a source checkout.
+    name: Install smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Build the wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel
+
+      - name: Install the wheel into a fresh virtualenv
+        run: |
+          python -m venv "$RUNNER_TEMP/smoke"
+          "$RUNNER_TEMP/smoke/bin/pip" install --upgrade pip
+          "$RUNNER_TEMP/smoke/bin/pip" install dist/*.whl
+
+      - name: Import the installed package
+        run: |
+          "$RUNNER_TEMP/smoke/bin/python" -c "import bankstatementparser_transport_ebics as w; print(w.__version__)"
+
+      - name: Run an example from a neutral working directory
+        run: |
+          cd "$RUNNER_TEMP" && "$RUNNER_TEMP/smoke/bin/python" "$GITHUB_WORKSPACE/examples/01_basic_usage.py"
