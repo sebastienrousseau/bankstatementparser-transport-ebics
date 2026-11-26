@@ -208,8 +208,10 @@ class EbicsClient:
             else xml_data
         )
 
-        return_code = "000000"
-        report_text = "OK"
+        # No ReturnCode means the server's verdict is unknown, which must
+        # not read as success: is_success checks for an explicit code.
+        return_code = ""
+        report_text = ""
         order_id = None
         tx_id = None
         payload_bytes = b""
