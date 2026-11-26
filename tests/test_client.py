@@ -10,6 +10,7 @@ from datetime import date
 from decimal import Decimal
 
 import pandas as pd
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -23,6 +24,7 @@ from bankstatementparser_transport_ebics import (
     fetch_and_parse,
     fetch_statement,
 )
+from bankstatementparser_transport_ebics import client as client_module
 
 
 def _sample_camt053_xml() -> str:
@@ -184,6 +186,67 @@ def test_parse_response_raw_order_data() -> None:
     assert not resp.is_success
     assert resp.return_code == "091008"
     assert resp.payload == b"plain_text_order_data"
+
+
+def test_parse_response_defaults_when_tags_absent() -> None:
+    """A response with none of the expected tags keeps the defaults."""
+    client = EbicsClient(EbicsConfig("H", "P", "U", "https://bank.com"))
+    resp = client.parse_response("<ebicsResponse/>")
+    assert resp.return_code == "000000"
+    assert resp.report_text == "OK"
+    assert resp.order_id is None
+    assert resp.transaction_id is None
+    assert resp.payload == b""
+
+
+def test_parse_response_ignores_unclosed_tags() -> None:
+    """An opening tag with no closing tag leaves that field unset."""
+    client = EbicsClient(EbicsConfig("H", "P", "U", "https://bank.com"))
+    resp = client.parse_response(
+        "<ebicsResponse><ReturnCode>091008<ReportText>bad"
+        "<OrderID>O1<TransactionID>T1<OrderData>QUJD"
+    )
+    assert resp.return_code == "000000"
+    assert resp.report_text == "OK"
+    assert resp.order_id is None
+    assert resp.transaction_id is None
+    assert resp.payload == b""
+
+
+def test_fetch_statement_without_an_iso_booking_date() -> None:
+    """Entries with a missing or non-ISO booking date get no date."""
+    config = EbicsConfig("H", "P", "U", "https://bank.com")
+    first = "<BookgDt><Dt>2026-01-15</Dt></BookgDt>"
+    second = "<BookgDt><Dt>2026-01-16</Dt></BookgDt>"
+    camt_xml = (
+        _sample_camt053_xml()
+        .replace(first, "")
+        .replace(second, "<BookgDt><Dt>16/01/2026</Dt></BookgDt>")
+    )
+    txs = fetch_statement(config, mock_payload=camt_xml)
+    assert [tx.booking_date for tx in txs] == [None, None]
+    assert [tx.amount for tx in txs] == [Decimal("250.00"), Decimal("-50.00")]
+
+
+def test_fetch_statement_with_a_null_date(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A parser row whose date is None or NaN gets no booking date."""
+
+    class _Parser:
+        def parse(self) -> pd.DataFrame:
+            return pd.DataFrame(
+                [
+                    {"amount": "1.00", "date": None},
+                    {"amount": "2.00", "date": float("nan")},
+                ]
+            )
+
+    monkeypatch.setattr(client_module, "create_parser", lambda _: _Parser())
+    config = EbicsConfig("H", "P", "U", "https://bank.com")
+    txs = fetch_statement(config, mock_payload="<Document/>")
+    assert [tx.booking_date for tx in txs] == [None, None]
+    assert [tx.amount for tx in txs] == [Decimal("1.00"), Decimal("2.00")]
 
 
 def test_fetch_statement_and_parse() -> None:
