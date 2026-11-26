@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bankstatementparser-transport-ebics"
-version = "0.0.19"
+version = "0.0.35"
 description = "EBICS 3.0 / 2.5 request builder and statement payload parser for bankstatementparser."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -25,6 +25,11 @@ mypy = ">=1.5,<3"
 bandit = "^1.7.0"
 hypothesis = ">=6.82,<7"
 interrogate = "^1.7.0"
+# tests/test_client.py and tests/test_suite_conformance.py read
+# pyproject.toml with tomllib, which is stdlib only from 3.11; CI
+# tests 3.10 too.
+tomli = { version = ">=2", python = "<3.11" }
+packaging = ">=23"
 
 [build-system]
 requires = ["poetry-core"]

@@ -6,13 +6,20 @@
 from __future__ import annotations
 
 import base64
+import sys
 from datetime import date
 from decimal import Decimal
+from pathlib import Path
 
 import pandas as pd
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+
+if sys.version_info >= (3, 11):  # pragma: no cover - version dependent
+    import tomllib
+else:  # pragma: no cover - version dependent
+    import tomli as tomllib
 
 from bankstatementparser_transport_ebics import (
     EbicsClient,
@@ -84,8 +91,12 @@ def _sample_camt053_xml() -> str:
 
 
 def test_version() -> None:
-    """Verifies that version is exposed and semantic."""
-    assert __version__ == "0.0.19"
+    """The exported version is the one pyproject.toml declares."""
+    with (Path(__file__).resolve().parents[1] / "pyproject.toml").open(
+        "rb"
+    ) as handle:
+        declared = tomllib.load(handle)["tool"]["poetry"]["version"]
+    assert __version__ == declared
 
 
 def test_ebics_keystore_digest() -> None:
