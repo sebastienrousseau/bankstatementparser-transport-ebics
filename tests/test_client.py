@@ -189,11 +189,13 @@ def test_parse_response_raw_order_data() -> None:
 
 
 def test_parse_response_defaults_when_tags_absent() -> None:
-    """A response with none of the expected tags keeps the defaults."""
+    """A response without a ReturnCode is not reported as a success."""
     client = EbicsClient(EbicsConfig("H", "P", "U", "https://bank.com"))
     resp = client.parse_response("<ebicsResponse/>")
-    assert resp.return_code == "000000"
-    assert resp.report_text == "OK"
+    assert resp.return_code == ""
+    assert resp.report_text == ""
+    assert not resp.is_success
+    assert not resp.is_segment_complete
     assert resp.order_id is None
     assert resp.transaction_id is None
     assert resp.payload == b""
@@ -206,8 +208,9 @@ def test_parse_response_ignores_unclosed_tags() -> None:
         "<ebicsResponse><ReturnCode>091008<ReportText>bad"
         "<OrderID>O1<TransactionID>T1<OrderData>QUJD"
     )
-    assert resp.return_code == "000000"
-    assert resp.report_text == "OK"
+    assert resp.return_code == ""
+    assert resp.report_text == ""
+    assert not resp.is_success
     assert resp.order_id is None
     assert resp.transaction_id is None
     assert resp.payload == b""
