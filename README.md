@@ -29,10 +29,9 @@
 
 - [What is bankstatementparser-transport-ebics?](#what-is-bankstatementparser-transport-ebics) — the problem it solves
 - [Install](#install) — PyPI, virtualenv
-- [Quick start](#quick-start) — fetch statements via EBICS in three lines
+- [Current limitations](#current-limitations) — what this release does not do yet
+- [Quick start](#quick-start) — parse a downloaded statement payload
 - [Public API](#public-api) — `EbicsClient`, `EbicsConfig`, `fetch_statement`, `fetch_and_parse`
-- [Protocol Capabilities](#protocol-capabilities) — EBICS 3.0 (`H005`) and 2.5 (`H004`) support
-- [Supported Order Types](#supported-order-types) — `STA`, `C53`, `C52`, `C54`, `INI`, `HIA`, `HPB`
 - [Development](#development) — quality gates, tests
 - [Ecosystem](#ecosystem) — modular package suite
 - [Contributing](#contributing)
@@ -44,14 +43,29 @@
 
 **EBICS** (Electronic Banking Internet Communication Standard) is the secure, multi-bank communication protocol mandatory across European and global corporate treasury operations.
 
-**bankstatementparser-transport-ebics** provides an automated transport layer for connecting to bank servers over EBICS 3.0 (`H005`) and 2.5 (`H004`), downloading statements (`STA`, `C53`, `C54`), and immediately dispatching them into `bankstatementparser` transaction pipelines.
+**bankstatementparser-transport-ebics** builds EBICS 3.0 (`H005`) and 2.5 (`H004`) request envelopes, reads the return code and order data out of EBICS responses, and parses statement payloads (`STA`, `C53`, `C54`) into `bankstatementparser` transactions. It does not yet talk to a bank server itself: see [Current limitations](#current-limitations).
 
 | Concern | How this adapter handles it |
 | :--- | :--- |
 | **Protocol Versions** | Supports EBICS 3.0 (`H005`) and EBICS 2.5 (`H004`) XML envelopes |
 | **Order Types** | `STA` (MT940), `C53` (CAMT.053), `C52` (CAMT.052), `C54` (CAMT.054), `INI`, `HIA`, `HPB` |
-| **Authentication** | Electronic Signature (`A006`), Identification & Authentication (`X002`), Encryption (`E002`) |
-| **Direct Ingestion** | Directly parses downloaded statement payloads into unified `Transaction` objects |
+| **Keys** | Holds `A006`, `X002` and `E002` key values; `INI`/`HIA` requests carry a SHA-256 digest of the signature key |
+| **Direct Ingestion** | Parses a statement payload you supply into unified `Transaction` objects |
+
+---
+
+## Current limitations
+
+- **No network transport.** `EbicsConfig.url` is stored but never
+  contacted. `fetch_statement` and `fetch_and_parse` parse the payload
+  passed as `mock_payload` and return nothing when none is given.
+- **No signing or encryption.** Requests are not signed (`A006`),
+  authenticated (`X002`) or encrypted (`E002`), and responses are not
+  verified or decrypted.
+
+Use it to build and inspect EBICS envelopes and to parse statements you
+have already downloaded with another EBICS client; do not use it as the
+connection to your bank.
 
 ---
 
@@ -82,6 +96,8 @@ python -m pip install -U bankstatementparser-transport-ebics
 ## Quick start
 
 ```python
+from pathlib import Path
+
 from bankstatementparser_transport_ebics import EbicsClient, EbicsConfig, EbicsOrderType
 
 config = EbicsConfig(
@@ -94,8 +110,11 @@ config = EbicsConfig(
 
 client = EbicsClient(config)
 
-# Fetch and parse CAMT.053 statement directly into Transaction models
-transactions = client.fetch_statement(order_type=EbicsOrderType.C53)
+# Parse a CAMT.053 statement downloaded with another EBICS client
+payload = Path("statement.xml").read_bytes()
+transactions = client.fetch_statement(
+    order_type=EbicsOrderType.C53, mock_payload=payload
+)
 for tx in transactions:
     print(f"{tx.booking_date} | {tx.description} | {tx.amount} {tx.currency}")
 ```
@@ -106,8 +125,8 @@ for tx in transactions:
 
 - `EbicsConfig(host_id, partner_id, user_id, url, version="H005")`: Credentials and endpoint configuration.
 - `EbicsClient(config, key_store=None)`: Main transport client with `build_initialization_request`, `build_download_request`, `parse_response`, `fetch_statement`, `fetch_and_parse`.
-- `fetch_statement(config, order_type, start_date, end_date)`: Convenience helper returning `list[Transaction]`.
-- `fetch_and_parse(config, order_type, start_date, end_date)`: Convenience helper returning `pandas.DataFrame`.
+- `fetch_statement(config, order_type, start_date, end_date, mock_payload)`: Convenience helper returning `list[Transaction]`.
+- `fetch_and_parse(config, order_type, start_date, end_date, mock_payload)`: Convenience helper returning `pandas.DataFrame`.
 
 ---
 

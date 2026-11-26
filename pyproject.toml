@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "bankstatementparser-transport-ebics"
 version = "0.0.19"
-description = "EBICS 3.0 / 2.5 transport protocol adapter and automated statement fetcher for bankstatementparser."
+description = "EBICS 3.0 / 2.5 request builder and statement payload parser for bankstatementparser."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache-2.0 OR MIT"
 readme = "README.md"
