@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ebicsResponse>
+<header>
+<ReturnCode>000000</ReturnCode>
+<ReportText>[EBICS_OK] Processing completed successfully.</ReportText>
+<OrderID>ORD12345</OrderID>
+<TransactionID>TX998877</TransactionID>
+</header>
+<body>
+<OrderData>U1RBVEVNRU5UX0RBVEE=</OrderData>
+</body>
+</ebicsResponse>
