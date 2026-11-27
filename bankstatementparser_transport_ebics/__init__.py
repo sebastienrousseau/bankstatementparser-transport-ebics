@@ -15,7 +15,7 @@ from .client import (
     fetch_statement,
 )
 
-__version__ = "0.0.35"
+__version__ = "0.0.36"
 __all__ = [
     "EbicsClient",
     "EbicsConfig",
