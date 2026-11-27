@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sebastienrousseau/bankstatementparser-transport-ebics/main/.github/demo.gif" alt="A terminal printing bankstatementparser-transport-ebics 0.0.36, then the two examples building INI and C53 requests, reading a C53 download response and parsing its CAMT.053 statement into two transactions" width="100%" />
+  <img src="https://raw.githubusercontent.com/sebastienrousseau/bankstatementparser-transport-ebics/main/.github/demo.gif" alt="A terminal printing the installed version, 0.0.36, then the two examples building INI and C53 requests, reading a C53 download response and parsing its CAMT.053 statement into two transactions" width="100%" />
 </p>
 
 ---
