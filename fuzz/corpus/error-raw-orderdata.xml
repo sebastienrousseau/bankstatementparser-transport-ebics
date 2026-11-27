@@ -1,0 +1,5 @@
+<ebicsResponse>
+<ReturnCode>091008</ReturnCode>
+<ReportText>Transaction unknown</ReportText>
+<OrderData>plain_text_order_data</OrderData>
+</ebicsResponse>
