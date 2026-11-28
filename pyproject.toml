@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bankstatementparser-transport-ebics"
-version = "0.0.36"
+version = "0.0.37"
 description = "EBICS 3.0 / 2.5 request builder and statement payload parser for bankstatementparser."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -14,7 +14,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-bankstatementparser = ">=0.0.35"
+bankstatementparser = ">=0.0.36"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.0.0,<10.0.0"
