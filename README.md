@@ -65,11 +65,11 @@
 pip install bankstatementparser-transport-ebics
 ```
 
-That installs the package, `bankstatementparser >= 0.0.35` and pandas.
+That installs the package, `bankstatementparser >= 0.0.36` and pandas.
 
 | Channel | Command | Notes |
 | :--- | :--- | :--- |
-| PyPI | `pip install bankstatementparser-transport-ebics` | Pulls in `bankstatementparser >= 0.0.35` |
+| PyPI | `pip install bankstatementparser-transport-ebics` | Pulls in `bankstatementparser >= 0.0.36` |
 | Source | `git clone https://github.com/sebastienrousseau/bankstatementparser-transport-ebics && cd bankstatementparser-transport-ebics && poetry install` | For local development |
 
 Verify the installation:
@@ -93,7 +93,7 @@ python -m pip install -U bankstatementparser-transport-ebics
 ## Requirements
 
 - **Python 3.10 or later.** CI tests CPython 3.10, 3.11, 3.12, 3.13 and 3.14 on Linux, macOS and Windows; [`docs/POLICIES.md`](docs/POLICIES.md) says when the floor moves.
-- **[`bankstatementparser`](https://pypi.org/project/bankstatementparser/) 0.0.35 or later**, which parses the statement payloads, and pandas, which it brings.
+- **[`bankstatementparser`](https://pypi.org/project/bankstatementparser/) 0.0.36 or later**, which parses the statement payloads, and pandas, which it brings.
 - **An EBICS client** to talk to your bank, if you need one: this package opens no connection (see [When not to use](#when-not-to-use-bankstatementparser-transport-ebics)).
 
 ---
